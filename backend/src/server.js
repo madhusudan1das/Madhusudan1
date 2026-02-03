@@ -14,13 +14,25 @@ const __dirname = path.resolve();
 const PORT = ENV.PORT || 3000;
 
 app.use(express.json({ limit: "50mb" })); // req.body
-const allowedOrigins = [ENV.CLIENT_URL, "http://localhost:5173", "http://localhost:5174"];
+
+const normalizeUrl = (url) => url ? url.replace(/\/$/, "") : "";
+const clientUrl = normalizeUrl(ENV.CLIENT_URL);
+const allowedOrigins = [
+  clientUrl,
+  clientUrl.includes("www.") ? clientUrl.replace("www.", "") : clientUrl.replace("://", "://www."),
+  "http://localhost:5173",
+  "http://localhost:5174"
+].filter(Boolean);
+
+console.log("Allowed Origins:", allowedOrigins);
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin) || ENV.NODE_ENV === "development") {
         callback(null, true);
       } else {
+        console.log("Blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
