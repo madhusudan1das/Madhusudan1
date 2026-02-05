@@ -95,7 +95,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "DEBUG: Password incorrect" });
     }
 
-    generateToken(user._id, res);
+    const token = generateToken(user._id, res);
     console.log("Token generated for:", email);
 
     res.status(200).json({
@@ -103,6 +103,7 @@ export const login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
+      token,
     });
   } catch (error) {
     console.error("Error in login controller:", error);
@@ -132,7 +133,7 @@ export const verifyEmail = async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    generateToken(user._id, res);
+    const token = generateToken(user._id, res);
 
     // Send welcome email after verification
     try {
@@ -146,6 +147,7 @@ export const verifyEmail = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
+      token,
     });
   } catch (error) {
     console.log("Error in verifyEmail controller:", error);
