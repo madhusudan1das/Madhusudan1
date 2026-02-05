@@ -15,6 +15,9 @@ function ContactList() {
 
   return (
     <>
+      {allContacts.length === 0 && (
+        <div className="text-center text-slate-500 py-4">No contacts found</div>
+      )}
       {allContacts.map((contact) => (
         <div
           key={contact._id}

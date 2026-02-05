@@ -36,7 +36,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Account created! Please verify your email.");
       // get().connectSocket(); // Don't connect socket yet
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || error.message || "Signup failed");
     } finally {
       set({ isSigningUp: false });
     }
@@ -80,7 +80,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Profile updated successfully");
     } catch (error) {
       console.log("Error in update profile:", error);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || error.message || "Profile update failed");
     }
   },
 
@@ -92,7 +92,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Email verified successfully!");
       get().connectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || error.message || "Verification failed");
     } finally {
       set({ isSigningUp: false });
     }
