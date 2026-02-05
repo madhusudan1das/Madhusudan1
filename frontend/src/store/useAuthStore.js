@@ -19,13 +19,14 @@ export const useAuthStore = create(
 
       checkAuth: async () => {
         try {
+          // Keep the token! Don't overwrite it with the profile check which lacks it.
+          const token = get().authUser?.token;
           const res = await axiosInstance.get("/auth/check");
-          set({ authUser: res.data });
+          set({ authUser: { ...res.data, token } });
           get().connectSocket();
         } catch (error) {
           console.log("Error in authCheck:", error);
           // Only clear auth if strictly unauthorized or 404 (user deleted)
-          // If it's a network error, keep the local data so they stay logged in offline!
           if (error.response?.status === 401 || error.response?.status === 404) {
             set({ authUser: null });
           }
