@@ -104,7 +104,7 @@ function ChatContainer() {
         </div>
       )}
 
-      <div className="flex-1 px-6 overflow-y-auto py-8">
+      <div className="flex-1 px-2 md:px-6 overflow-y-auto overflow-x-hidden py-4 md:py-8">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((msg) => (
@@ -148,7 +148,7 @@ function ChatContainer() {
                       className="sm:max-w-[200px] rounded-md mb-2"
                     />
                   )}
-                  {msg.text && <p>{msg.text}</p>}
+                  {msg.text && <p className="break-words">{msg.text}</p>}
 
                   {/* Actions (only if NOT in selection mode and sender is me) */}
                   {!isSelectionMode && msg.senderId === authUser._id && (
