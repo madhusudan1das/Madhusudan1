@@ -12,7 +12,7 @@ function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
 
   return (
-    <div className="relative w-full max-w-6xl h-[calc(100vh-8rem)]">
+    <div className="relative w-full max-w-6xl h-[100dvh] sm:h-[calc(100vh-8rem)]">
       <BorderAnimatedContainer>
         {/* LEFT SIDE: Show on mobile if NO user selected, or always on desktop */}
         <div className={`w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex flex-col border-r border-slate-700/50 
