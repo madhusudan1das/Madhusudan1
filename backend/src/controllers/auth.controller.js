@@ -25,8 +25,40 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    const user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: "Email already exists" });
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        return res.status(400).json({ message: "Email already exists" });
+      } else {
+        // User exists but is NOT verified. Allow "Re-Signup" (Overwrite).
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        existingUser.password = hashedPassword;
+        existingUser.fullName = fullName;
+        existingUser.otp = otp;
+        existingUser.otpExpires = otpExpires;
+
+        await existingUser.save();
+
+        // Send verification email
+        try {
+          await sendVerificationEmail(existingUser.email, otp);
+        } catch (error) {
+          console.error("Failed to send verification email:", error);
+        }
+
+        return res.status(200).json({
+          _id: existingUser._id,
+          fullName: existingUser.fullName,
+          email: existingUser.email,
+          message: "OTP sent to your email (Signup Restarted)"
+        });
+      }
+    }
 
     // 123456 => $dnjasdkasj_?dmsakmk
     const salt = await bcrypt.genSalt(10);
@@ -53,9 +85,6 @@ export const signup = async (req, res) => {
         await sendVerificationEmail(savedUser.email, otp);
       } catch (error) {
         console.error("Failed to send verification email:", error);
-        // Optional: Delete user if email fails
-        // await User.findByIdAndDelete(savedUser._id);
-        // return res.status(500).json({ message: "Failed to send verification email" });
       }
 
       res.status(201).json({
@@ -86,7 +115,11 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       console.log("User not found:", email);
-      return res.status(400).json({ message: "DEBUG: User not found with this email" });
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(400).json({ message: "Please verify your email first" });
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
