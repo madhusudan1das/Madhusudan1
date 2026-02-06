@@ -107,6 +107,37 @@ export const useAuthStore = create(
         }
       },
 
+      resendOtp: async (email) => {
+        try {
+          await axiosInstance.post("/auth/resend-otp", { email });
+          toast.success("OTP resent successfully!");
+        } catch (error) {
+          toast.error(error.response?.data?.message || "Failed to resend OTP");
+        }
+      },
+
+      forgotPassword: async (email) => {
+        try {
+          await axiosInstance.post("/auth/forgot-password", { email });
+          toast.success("Password reset OTP sent to your email");
+          return true;
+        } catch (error) {
+          toast.error(error.response?.data?.message || "Failed to send reset email");
+          return false;
+        }
+      },
+
+      resetPassword: async (data) => {
+        try {
+          await axiosInstance.post("/auth/reset-password", data);
+          toast.success("Password reset successfully! Please login.");
+          return true;
+        } catch (error) {
+          toast.error(error.response?.data?.message || "Failed to reset password");
+          return false;
+        }
+      },
+
       connectSocket: () => {
         const { authUser } = get();
         if (!authUser || get().socket?.connected) return;

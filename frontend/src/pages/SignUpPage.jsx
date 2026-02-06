@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import { MessageCircleIcon, LockIcon, MailIcon, UserIcon, LoaderIcon } from "lucide-react";
@@ -6,8 +6,29 @@ import { Link } from "react-router-dom";
 
 function SignUpPage() {
   const [formData, setFormData] = useState({ fullName: "", email: "", password: "" });
-  const { signup, isSigningUp, isVerifyingEmail, verifyEmail } = useAuthStore();
+  const { signup, isSigningUp, isVerifyingEmail, verifyEmail, resendOtp } = useAuthStore();
   const [otp, setOtp] = useState("");
+
+  const [canResend, setCanResend] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (timeLeft > 0 && !canResend) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setCanResend(true);
+    }
+    return () => clearInterval(timer);
+  }, [timeLeft, canResend]);
+
+  const handleResend = async () => {
+    setCanResend(false);
+    setTimeLeft(60);
+    await resendOtp(formData.email);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,6 +85,17 @@ function SignUpPage() {
                         "Verify Email"
                       )}
                     </button>
+
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={!canResend}
+                        className="text-slate-400 hover:text-cyan-400 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {canResend ? "Resend OTP" : `Resend in ${timeLeft}s`}
+                      </button>
+                    </div>
                   </form>
                 ) : (
                   /* SIGN UP FORM */
